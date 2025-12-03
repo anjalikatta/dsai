@@ -7,13 +7,15 @@ library(dplyr)
 library(readr)
 library(httr2)
 library(jsonlite)
-library(ellmer)
+library(ollamar)
+source("07_rag/functions.R")
 
-PORT = 11434
-OLLAMA_HOST = paste0("http://localhost:", PORT)
-DOCUMENT = "02_query_ollama/docs/pokemon.csv"
+MODEL = "smollm2:135m" # use this small model (no function calling, < 200 MB)
+PORT = 11434 # use this default port
+OLLAMA_HOST = paste0("http://localhost:", PORT) # use this default host
+DOCUMENT = "07_rag/docs/pokemon.csv" # path to the document to search
 
-
+# Define a search function we will operate programmatically
 search = function(query, document){
     read_csv(document, show_col_types = FALSE) %>%
         filter(stringr::str_detect(Name, query)) %>%
@@ -21,27 +23,32 @@ search = function(query, document){
         jsonlite::toJSON(auto_unbox = TRUE) 
 }
 
+# Test search function
 search("Pikachu", DOCUMENT)
 
 
-chat = chat_ollama(
-    model = "gemma3:latest",
-    base_url = OLLAMA_HOST,
+# Suppose the user supplies a specific item to search
+input = list(pokemon = "Pikachu")
+
+# Task 1: Data Retrieval - Searchthe document for the item ------------
+result1 = search(input$pokemon, DOCUMENT)
+
+# Task 2: Generation augmented with the data retrieved - Generate a profile description of the Pokemon
+role2 = "Output a short 200 word profile description of the Pokemon using the data provided by the user, written in markdown. Include a title, tagline, and notable stats."
+result2 = agent_run(role = role2, task = result1, model = MODEL, output = "text")
+
+
+# View result
+result2
+
+# Or, written manually using ollamar::chat
+result2b = chat(
+        model = MODEL,
     messages = list(
-        list(role = "system", content = "You are a helpful assistant."),
-        list(role = "user", content = "What is the capital of France?"),
-        list(role = "tool", content = search("Pikachu", DOCUMENT))
-    )
-)
+        list(role = "system", content = role2),
+        list(role = "user", content = result1)
+    ), output = "text", stream = FALSE)
 
-# get_search = ellmer::tool(
-#     fun = search,
-#     name = "search",
-#     description = "Search the document for the query and return a json of traits",
-#     arguments = list(
-#         query = type_array(type_string(), "Names"),
-#         document = type_array(type_string(), "Document to search")
-#     )
-# )
-
+# View result
+result2b
 
