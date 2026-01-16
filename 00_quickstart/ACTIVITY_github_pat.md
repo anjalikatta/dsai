@@ -1,9 +1,14 @@
-# Activity: Getting Your Github Personal Access Token 
-## for Commit, Pull, and Push Operations with Github Repositories
+# 📌 ACTIVITY
+
+## Getting Your Github Personal Access Token 
+
+for Commit, Pull, and Push Operations with Github Repositories
 
 *Estimated Time: 10 minutes*
 
 ---
+
+## ✅ Your Task
 
 In this activity, you are asked to follow the necessary steps to allow you to commit, pull, and push changes on GitHub repositories. Please be sure to create a GitHub Repository first.
 
@@ -13,7 +18,7 @@ In this activity, you are asked to follow the necessary steps to allow you to co
 - [ ] Must have the complete URL of the GitHub Repository. For example, our GitHub Repository is https://GitHub.com/timothyfraser/dsai.git
 
 
-## Tasks
+## Checklist
 
 *Note: you can check these boxes off as you go!*
 
@@ -83,3 +88,17 @@ gert::git_commit_all("my first commit")
 # push your commit to GitHub
 gert::git_push() 
 ```
+
+
+
+## 📤 To Submit
+
+- For credit: Just confirm that you've finished this step in the CANVAS textbox.
+
+---
+
+![](../docs/images/icons.png)
+
+---
+
+← 🏠 [Back to Top](#ACTIVITY)

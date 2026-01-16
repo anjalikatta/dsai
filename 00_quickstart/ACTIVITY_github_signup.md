@@ -1,10 +1,12 @@
-# 📌 Activity: Setup Github Account
+# ACTIVITY
+
+## Setup Github Account
 
 🕒 *Estimated Time: 5–10 minutes*
 
 ---
 
-## ✅ Your Task: Set Up GitHub
+## ✅ Your Task
 
 Follow the steps below to get your GitHub account ready for use in this course.
 
@@ -29,6 +31,14 @@ Follow the steps below to get your GitHub account ready for use in this course.
 ![Github Profile](../images/github_profile.png)
 
 
-# 📤 To Submit (Important)!
+## 📤 To Submit (Important)!
 
 - For credit: Upon completion, enter into the CANVAS assignment textbox entry a screenshot of your Github account homepage!
+
+---
+
+![](../docs/images/icons.png)
+
+---
+
+← 🏠 [Back to Top](#ACTIVITY)

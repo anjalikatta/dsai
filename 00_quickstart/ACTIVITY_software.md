@@ -47,9 +47,9 @@ Choose one or more IDEs based on your preferences:
 
 ---
 
-# 📤 To Submit
+## 📤 To Submit
 
-- For credit: No submission required for this activity. Proceed to the next activity once Python and/or R are installed.
+- For credit: Submit on canvas screenshots of each installed software!
 
 ---
 

@@ -35,9 +35,9 @@ Install Git and Git Bash on your computer. Git Bash provides a Unix-like command
 
 ---
 
-# 📤 To Submit
+## 📤 To Submit
 
-- For credit: No submission required for this activity. Proceed to the next activity once Git and Git Bash are installed.
+- For credit: Submit a screenshot in the canvas textbox of your output when you run `git --version` and `curl --version`.
 
 ---
 
