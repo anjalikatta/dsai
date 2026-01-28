@@ -10,9 +10,13 @@
 library(httr2)
 library(jsonlite)
 
+# Load environment variables from .env file
+readRenviron(".env")
+TEST_API_KEY = Sys.getenv("TEST_API_KEY")
+
 # Create request object
 req = request("https://reqres.in/api/users/2") |>
-  req_headers(`x-api-key` = "reqres-free-v1") |>
+  req_headers(`x-api-key` = TEST_API_KEY) |>
   req_method("GET")
 
 # Execute request and store result as object
