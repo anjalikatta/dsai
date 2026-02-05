@@ -10,17 +10,17 @@ alias lms='/c/Users/tmf77/.lmstudio/bin/lms.exe'
 export PATH="$PATH:/c/Users/tmf77/AppData/Local/Programs/Ollama"
 alias ollama='/c/Users/tmf77/AppData/Local/Programs/Ollama/ollama.exe'
 
-# Add R to your Path for this project (here's mine)
-export PATH="$PATH:/c/Program Files/R/R-4.4.1/bin"
-alias Rscript='/c/Program Files/R/R-4.4.1/bin/Rscript.exe'
-# Add R libraries to your path for this project (here's mine)
-export R_LIBS_USER="/c/Users/tmf77/AppData/Local/R/win-library/4.2"
+# --- R Configuration ---
+export PATH="$PATH:/c/Program Files/R/R-4.5.2/bin"
+alias Rscript='/c/Program Files/R/R-4.5.2/bin/Rscript.exe'
 
-# Add Python to your Path for this project (here's mine)
-export PATH="$PATH:/c/Python312"
-alias python='/c/Python312/python.exe'
+# --- Python Configuration (Windows Store Version) ---
+# This is the path where your python.exe lives
+export PATH="$PATH:/c/Users/akatt/AppData/Local/Microsoft/WindowsApps"
+alias python='/c/Users/akatt/AppData/Local/Microsoft/WindowsApps/python.exe'
 
-# Add uvicorn to your Path for this project - if using Python for APIs (here's mine)
-export PATH="$PATH:/c/Users/tmf77/AppData/Roaming/Python/Python312/Scripts"
+# --- Python Scripts (Uvicorn, Pip, FastAPI) ---
+# IMPORTANT: This is the messy path from your error message!
+export PATH="$PATH:/c/Users/akatt/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/local-packages/Python311/Scripts"
 
-echo "✅ Local .bashrc loaded."
+echo "✅ Environment configured for akatt."
