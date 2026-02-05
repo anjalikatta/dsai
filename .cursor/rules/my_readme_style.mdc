@@ -1,0 +1,77 @@
+---
+description: README formatting preferences — headers, icons, code blocks, tone, file references
+globs: ["**/README*.md"]
+alwaysApply: false
+---
+# My README Formatting Style
+
+Apply these preferences when creating or editing README files.
+
+---
+
+## Headers
+
+- **H1** (`#`): Title only. Use backticks for path-style titles: `# README \`/folder\`` or `# README: Short Description`
+- **H2** (`##`): Main sections (Table of Contents, Activities, Readings, etc.)
+- **H3** (`###`): Subsections when needed; avoid deeper nesting
+- **Icons in headers**: Use emoji to mark section headers — e.g. `## 📚 QUICK LINKS`, `## 📋 Activities`, `## 🧱 Modules`, `# 💬 Questions?`
+- **Section separators**: Use `---` horizontal rules between major sections
+
+---
+
+## Icons and Images
+
+- **Banner**: Start with `![Banner Image](path/to/images.png)` (root) or `../docs/images/icons.png` (subfolders)
+- **Footer**: End with `![Footer Image](path/to/icons.png)` before the Back to Top link
+- **Section icons**: Prefer emoji for clarity — 📚 docs, 📋 lists/syllabus, 🎯 about, 🧱 modules, 💬 questions, 🔧 setup, 🚀 deployment, ✅ checklists, ⚠️ warnings
+- Use icons sparingly for emphasis; avoid clutter
+
+---
+
+## Code Blocks
+
+- **Syntax highlighting**: Always specify language — ` ```r `, ` ```python `, ` ```bash `, ` ```json `, ` ```markdown `
+- **Runnable examples**: Include practical, complete code snippets; add brief comments for non-obvious steps
+- **Reference files**: When showing a snippet, reference the actual file: "In [`my_good_query.R`](my_good_query.R):"
+- **Tables for structured data**: Use markdown tables for parameters, fields, options
+- **Mermaid diagrams**: Use for flow diagrams when helpful (e.g. `flowchart LR`)
+
+---
+
+## File References
+
+- **ACTIVITY / READ / LAB files**: Human-readable link text with prefix
+  - Format: `[ACTIVITY: Human-Readable Title](ACTIVITY_filename.md)`
+  - Same for `[READ: Title](READ_filename.md)` and `[LAB: Title](LAB_filename.md)`
+- **Code and script files**: Filename in backticks as link text
+  - Format: ``[`filename.ext`](path/to/file.ext)``
+  - Add brief description after: ``[`01_example.py`](01_example.py) — Python example``
+- **Always use relative hyperlinks** when discussing files; never bare filenames
+- In prose: "See [`plumber.R`](plumber.R)" not "See plumber.R"
+
+---
+
+## Tone and Voice
+
+- **Concise**: Get to the point; avoid filler and redundancy
+- **Humble**: Explain clearly; don't assume expertise
+- **Direct**: State facts, skip hedging
+- **Avoid**: "it is obvious", "it is critical", "clearly", "obviously", "as you can see", "it goes without saying"
+- **Prefer**: "This step configures the API" over "It is critical that you configure the API"
+
+---
+
+## Structure Checklist
+
+- Banner image → H1 title → blockquote intro (2–3 sentences)
+- `---` → Table of Contents (anchor links) → `---`
+- Main content with H2/H3
+- Footer image → `---` → Back to Top: `← 🏠 [Back to Top](#Table-of-Contents)` or `← [Back to Top](#anchor-for-title)`
+
+---
+
+## Formatting
+
+- **Bold** for key terms, file names, important concepts
+- *Italics* for subtle emphasis or alternatives
+- Inline `` `code` `` for filenames, commands, function names, parameters
