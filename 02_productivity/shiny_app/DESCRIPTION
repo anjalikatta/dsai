@@ -1,0 +1,18 @@
+Package: fda_recall_app
+Type: Application
+Title: FDA Device Recall Explorer (Shiny)
+Description: Shiny app that queries the FDA Open API device/recall endpoint
+  by date range and displays results in a data table.
+Version: 0.1.0
+Depends:
+  R (>= 4.0.0)
+Imports:
+  shiny,
+  bslib,
+  httr,
+  jsonlite,
+  dplyr,
+  DT
+Suggests:
+  testthat
+License: MIT
