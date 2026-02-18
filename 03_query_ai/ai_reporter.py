@@ -10,7 +10,7 @@
 
 ## 0.1 Load Packages #################################
 
-# pip install requests pandas python-dotenv markdown python-docx
+# pip install requests pandas python-dotenv
 
 import sys
 import requests
@@ -18,8 +18,6 @@ import json
 import os
 import pandas as pd
 from dotenv import load_dotenv
-import markdown
-from docx import Document
 
 # Fix Windows terminal encoding for emoji/unicode output
 sys.stdout.reconfigure(encoding="utf-8")
@@ -143,58 +141,11 @@ report_text = result["choices"][0]["message"]["content"]
 print("📝 AI Report Generated:\n")
 print(report_text)
 
-# 4. SAVE REPORT IN MULTIPLE FORMATS ###################################
+# 4. SAVE REPORT ###################################
 
-## 4.1 Save as Markdown (.md) ########################
+output_file = "lab_ai_reporter_output.md"
 
-with open("report.md", "w", encoding="utf-8") as f:
+with open(output_file, "w", encoding="utf-8") as f:
     f.write(report_text)
-print("\n✅ Saved report.md")
 
-## 4.2 Save as Plain Text (.txt) #####################
-
-with open("report.txt", "w", encoding="utf-8") as f:
-    f.write(report_text)
-print("✅ Saved report.txt")
-
-## 4.3 Save as HTML (.html) ##########################
-
-html_content = markdown.markdown(report_text)
-html_document = f"""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>FDA Device Recall Report 2024</title>
-    <style>
-        body {{ font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }}
-        h1 {{ color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }}
-        h2 {{ color: #34495e; margin-top: 30px; }}
-        li {{ margin-bottom: 6px; }}
-    </style>
-</head>
-<body>
-{html_content}
-</body>
-</html>"""
-
-with open("report.html", "w", encoding="utf-8") as f:
-    f.write(html_document)
-print("✅ Saved report.html")
-
-## 4.4 Save as Word Document (.docx) #################
-
-doc = Document()
-for line in report_text.split("\n"):
-    if line.startswith("# "):
-        doc.add_heading(line[2:], level=1)
-    elif line.startswith("## "):
-        doc.add_heading(line[3:], level=2)
-    elif line.startswith("- "):
-        doc.add_paragraph(line[2:], style="List Bullet")
-    elif line.strip():
-        doc.add_paragraph(line)
-
-doc.save("report.docx")
-print("✅ Saved report.docx")
-
-print("\n✅ All report formats saved successfully!")
+print(f"\n✅ Saved {output_file}")
