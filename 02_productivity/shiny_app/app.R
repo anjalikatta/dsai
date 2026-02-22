@@ -17,6 +17,8 @@ library(jsonlite)
 library(dplyr)
 library(DT)
 
+httr::set_config(httr::config(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE))
+
 # Helpers: inlined so app works when sourced from any working directory (see utils.R for same code)
 load_env_if_exists = function() {
   candidates = c(
@@ -38,13 +40,21 @@ build_query_params = function(api_key, start_date, end_date, limit = 1000L) {
   list(api_key = api_key, search = search_expr, limit = as.integer(limit))
 }
 fetch_fda_recalls = function(base_url, params) {
-  response = httr::GET(base_url, query = params)
-  status = httr::status_code(response)
-  if (status != 200L) {
-    body = httr::content(response, as = "text", encoding = "UTF-8")
-    stop(sprintf("FDA API returned status %s: %s", status, body))
-  }
-  data = jsonlite::fromJSON(rawToChar(response$content), flatten = TRUE)
+  search_encoded = gsub("\\[", "%5B", params$search)
+  search_encoded = gsub("\\]", "%5D", search_encoded)
+  search_encoded = gsub(":", "%3A", search_encoded)
+  search_encoded = gsub(" ", "+", search_encoded)
+  full_url = sprintf(
+    "%s?api_key=%s&search=%s&limit=%s",
+    base_url, params$api_key, search_encoded, params$limit
+  )
+  tmp = tempfile(fileext = ".json")
+  cmd = sprintf('curl.exe -s -k -o "%s" "%s"', tmp, full_url)
+  exit_code = system(cmd, intern = FALSE, wait = TRUE)
+  if (exit_code != 0L) stop("FDA API request failed (curl exit code ", exit_code, ")")
+  if (!file.exists(tmp) || file.size(tmp) == 0L) stop("FDA API returned empty response")
+  data = jsonlite::fromJSON(tmp, flatten = TRUE)
+  unlink(tmp)
   if (is.null(data$results) || !is.data.frame(data$results)) return(data.frame())
   data$results
 }
@@ -79,9 +89,7 @@ LIMIT_CHOICES = c(100, 250, 500, 1000)
 ui = page_fillable(
   theme = bs_theme(
     bootswatch = "flatly",
-    primary = "#2c3e50",
-    base_font = bslib::font_google("Source Sans 3"),
-    heading_font = bslib::font_google("Source Sans 3")
+    primary = "#2c3e50"
   ),
   title = "FDA Device Recall Explorer",
   padding = 24,
