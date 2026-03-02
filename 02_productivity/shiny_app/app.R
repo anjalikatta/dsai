@@ -152,7 +152,7 @@ call_openai = function(api_key, prompt, model = "gpt-4o-mini") {
   writeLines(jsonlite::toJSON(body, auto_unbox = TRUE), tmp_in)
   tmp_out = tempfile(fileext = ".json")
   cmd = sprintf(
-    'curl.exe -s -k -o "%s" -X POST "https://api.openai.com/v1/chat/completions" -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d @"%s"',
+    'curl -s -k -o "%s" -X POST "https://api.openai.com/v1/chat/completions" -H "Authorization: Bearer %s" -H "Content-Type: application/json" -d @"%s"',
     tmp_out, api_key, tmp_in
   )
   exit_code = system(cmd, intern = FALSE, wait = TRUE)
