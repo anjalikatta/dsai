@@ -82,7 +82,9 @@ input_category = {"category": "Psychiatry"}
 
 # Task 1 - Function -------------------------
 # Get data on drug shortages for the category of interest
-data = get_shortages(category=input_category["category"], limit=500)
+print("Task 1: Fetching drug shortage data...")
+data = get_shortages(category=input_category["category"], limit=10)
+print(f"Task 1: Got {len(data)} records.")
 
 # Process the data into some summary table
 # Filter for items that are currently unavailable
@@ -103,7 +105,9 @@ role2_base = "Analyze medicine shortage data provide by the user in a table, and
 role2_with_rules = f"{role2_base}\n\n{format_rules_for_prompt(rules_data_analysis)}"
 
 # Run the agent with rules
+print("Task 2: Running analyst agent...")
 result2 = agent_run(role=role2_with_rules, task=result1, model=MODEL, output="text")
+print("Task 2: Done.")
 
 # Task 3 - Press Release Agent with Rules -------------------------
 # Base role for the press release agent
@@ -113,7 +117,9 @@ role3_base = "Write a 1-page press release on the currently ongoing shortages, u
 role3_with_rules = f"{role3_base}\n\n{format_rules_for_prompt(rules_press_release)}"
 
 # Run the agent with rules
+print("Task 3: Running press release agent...")
 result3 = agent_run(role=role3_with_rules, task=result2, model=MODEL, output="text")
+print("Task 3: Done.")
 
 # Note that the performance of the agent depends significantly on how much context you allow in one call.
 # https://docs.ollama.com/context-length
@@ -121,7 +127,7 @@ result3 = agent_run(role=role3_with_rules, task=result2, model=MODEL, output="te
 # 6. DISPLAY RESULTS ###################################
 
 # View press release
-print("📰 Press Release:")
+print("Press Release:")
 print(result3)
 print()
 

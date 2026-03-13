@@ -19,8 +19,8 @@ import time      # for timing operations
 
 ## 0.2 Configure Connection #########################
 
-# Select model of interest
-MODEL = "smollm2:1.7b"
+# Select model of interest (smollm2:360m is fast; gemma3:latest is slower)
+MODEL = "smollm2:360m"
 
 # Set the port where Ollama is running
 PORT = 11434
@@ -40,11 +40,11 @@ url = f"{OLLAMA_HOST}/api/chat"
 messages = [
     {
         "role": "system",
-        "content": "You are a talking mouse. Your name is Jerry. You can only talk about mice and cheese."
+        "content": "You are a creative writing assistant. You help craft vivid, engaging prose and suggest imaginative details."
     },
     {
         "role": "user",
-        "content": "Hello, how are you?"
+        "content": "Help me write an opening line for a mystery novel set in a coastal town."
     }
 ]
 
@@ -59,9 +59,10 @@ body = {
 
 # Time the request
 start_time = time.time()
+print("Calling Ollama...")
 
-# Send POST request to Ollama chat API
-response = requests.post(url, json=body)
+# Send POST request to Ollama chat API (120s timeout to avoid hanging forever)
+response = requests.post(url, json=body, timeout=120)
 
 # Check if request was successful
 response.raise_for_status()
@@ -86,15 +87,15 @@ messages.append({
 # 5. VIEW RESULTS ###################################
 
 # View the response
-print("📝 Model Response:")
+print("Model Response:")
 print(resp)
 print()
 
 # View the chat history
-print("💬 Full Chat History:")
+print("Full Chat History:")
 for msg in messages:
     print(f"{msg['role'].upper()}: {msg['content']}")
     print()
 
 # View timing information
-print(f"⏱️  Request took {elapsed_time:.2f} seconds")
+print(f"Request took {elapsed_time:.2f} seconds")

@@ -59,7 +59,7 @@ def agent(messages, model=DEFAULT_MODEL, output="text", tools=None, all=False):
             "stream": False
         }
         
-        response = requests.post(CHAT_URL, json=body)
+        response = requests.post(CHAT_URL, json=body, timeout=600)
         response.raise_for_status()
         result = response.json()
         
@@ -73,7 +73,7 @@ def agent(messages, model=DEFAULT_MODEL, output="text", tools=None, all=False):
             "stream": False
         }
         
-        response = requests.post(CHAT_URL, json=body)
+        response = requests.post(CHAT_URL, json=body, timeout=600)
         response.raise_for_status()
         result = response.json()
         
