@@ -1,9 +1,11 @@
-# 03_csv.py
-# Example RAG workflow using a CSV file
-# Pairs with 03_csv.R
+# lab_custom_rag_query.py
+# Custom RAG Query: Systems Engineering Project Risk Advisor
+# Pairs with LAB_custom_rag_query.md
 # Tim Fraser
 
-# This script demonstrates how to perform Retrieval-Augmented Generation (RAG) with a CSV file.
+# This script builds a Retrieval-Augmented Generation (RAG) workflow
+# that searches a CSV of systems engineering project risks
+# and uses an LLM to provide risk analysis and mitigation advice.
 
 # 0. SETUP ###################################
 
@@ -12,6 +14,7 @@
 import pandas as pd  # for reading CSV files and data manipulation
 import requests      # for HTTP requests
 import json          # for working with JSON
+import os            # for file path operations
 
 # If you haven't already, install these packages...
 # pip install pandas requests
@@ -27,15 +30,15 @@ from functions import agent_run
 MODEL = "smollm2:135m"  # use this small model (no function calling, < 200 MB)
 PORT = 11434  # use this default port
 OLLAMA_HOST = f"http://localhost:{PORT}"  # use this default host
-import os  # for file path operations
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DOCUMENT = os.path.join(SCRIPT_DIR, "data", "pokemon.csv")  # path to the document to search
+DOCUMENT = os.path.join(SCRIPT_DIR, "data", "project_risks.csv")  # path to our risk data
 
 # 1. SEARCH FUNCTION ###################################
 
-def search(query, document):
+def search_risks(query, document):
     """
-    Search a CSV file for rows matching the query in the Name column.
+    Search a CSV of project risks for rows matching the query.
+    Checks risk_name, category, description, and mitigation columns.
     
     Parameters:
     -----------
@@ -53,43 +56,55 @@ def search(query, document):
     # Read the CSV file
     df = pd.read_csv(document)
     
-    # Filter rows where Name contains the query (case-insensitive)
-    filtered_df = df[df["Name"].str.contains(query, case=False, na=False)]
+    # Search across multiple columns for the query (case-insensitive)
+    mask = (
+        df["risk_name"].str.contains(query, case=False, na=False) |
+        df["category"].str.contains(query, case=False, na=False) |
+        df["description"].str.contains(query, case=False, na=False) |
+        df["mitigation"].str.contains(query, case=False, na=False)
+    )
+    
+    # Filter matching rows
+    filtered_df = df[mask]
     
     # Convert to dictionary and then to JSON
     result_dict = filtered_df.to_dict(orient="records")
-    
-    # Convert to JSON string (auto-unbox equivalent: ensure single-item lists become values)
     result_json = json.dumps(result_dict, indent=2)
     
     return result_json
 
 # 2. TEST SEARCH FUNCTION ###################################
 
-# Test search function
+# Test search function with a sample query
 print("Testing search function...")
-test_result = search("Pikachu", DOCUMENT)
+test_result = search_risks("security", DOCUMENT)
 print("Search result preview:")
-print(test_result[:200] + "..." if len(test_result) > 200 else test_result)
+print(test_result[:300] + "..." if len(test_result) > 300 else test_result)
 print()
 
 # 3. RAG WORKFLOW ###################################
 
-# Suppose the user supplies a specific item to search
-input_data = {"pokemon": "Pikachu"}
+# Suppose the user wants to learn about risks related to a specific category
+input_data = {"topic": "technical"}
 
-# Task 1: Data Retrieval - Search the document for the item
-result1 = search(input_data["pokemon"], DOCUMENT)
+# Task 1: Data Retrieval - Search the CSV for risks matching the topic
+result1 = search_risks(input_data["topic"], DOCUMENT)
 
-# Task 2: Generation augmented with the data retrieved
-# Generate a profile description of the Pokemon
-role = "Output a short 200 word profile description of the Pokemon using the data provided by the user, written in markdown. Include a title, tagline, and notable stats."
+# Task 2: Generation augmented with the retrieved data
+# Design a system prompt that instructs the LLM to act as a risk advisor
+role = (
+    "You are a systems engineering risk advisor. "
+    "Given JSON data about project risks, output a concise risk briefing in markdown. "
+    "Include a title, a numbered list of each risk with its likelihood and impact, "
+    "and a short recommended action for each. "
+    "End with one overall recommendation for the project manager."
+)
 
 # Using our custom agent_run function, which wraps requests.post
 result2 = agent_run(role=role, task=result1, model=MODEL, output="text")
 
 # View result
-print("📝 Generated Pokemon Profile:")
+print("Risk Briefing:")
 print(result2)
 print()
 
@@ -116,5 +131,5 @@ response_data = response.json()
 result2b = response_data["message"]["content"]
 
 # View result
-print("📝 Alternative Approach Result:")
+print("Alternative Approach Result:")
 print(result2b)
