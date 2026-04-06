@@ -1,0 +1,35 @@
+FDA Device Recall Knowledge Base
+================================
+
+RECALL CLASSIFICATION LEVELS:
+Class I recalls are the most serious type of device recall. They involve situations where there is a reasonable probability that use of the product will cause serious adverse health consequences or death. Examples include defective pacemakers, contaminated surgical instruments, or software errors in life-support devices. Class I recalls require immediate action by healthcare facilities.
+
+Class II recalls involve situations where use of or exposure to a product may cause temporary or medically reversible adverse health consequences, or where the probability of serious adverse health consequences is remote. Most device recalls fall into Class II. Examples include malfunctioning blood glucose meters or mislabeled devices.
+
+Class III recalls involve situations where use of or exposure to a product is not likely to cause adverse health consequences. These are the least serious type of recall. Examples include minor labeling issues or cosmetic defects that do not affect device performance.
+
+COMMON ROOT CAUSES OF DEVICE RECALLS:
+Process Control failures account for approximately 15-20% of all device recalls. These include inadequate monitoring of manufacturing processes, calibration errors, insufficient process validation, and failure to follow standard operating procedures.
+
+Nonconforming Material or Component defects involve use of materials or components that do not meet specifications. This includes raw material defects, supplier quality issues, and incoming inspection failures. Component-level failures can cascade into widespread recalls affecting entire product lines.
+
+Software Design errors include bugs, inadequate testing, and failure to meet functional requirements. Software-related recalls have increased significantly with the growth of connected and digital medical devices. Common issues include incorrect calculations, user interface errors, and cybersecurity vulnerabilities.
+
+Design flaws are fundamental engineering or design deficiencies that affect device performance or safety. These recalls often require significant redesign efforts and may indicate gaps in the design control process required under FDA Quality System Regulation 21 CFR 820.
+
+Labeling errors include incorrect, incomplete, or misleading labels and instructions for use. Common labeling issues are wrong dosage information, missing warnings, incorrect device specifications, and translation errors for international markets.
+
+Under Investigation by Firm is a category used when recalls are initiated while the root cause is still being determined. This category frequently represents 25-30% of all recalls at any given time, reflecting the complexity of root cause analysis for medical devices.
+
+REGULATORY PROCESS:
+The FDA monitors device recalls through the Center for Devices and Radiological Health (CDRH). Manufacturers are required to report device corrections and removals under 21 CFR Part 806. The FDA can also mandate a recall if a manufacturer does not voluntarily initiate one. Recall status types include Ongoing, Terminated, and Completed.
+
+KEY METRICS AND TRENDS:
+The FDA processes approximately 3,000 to 4,000 device recalls annually. The majority of recalls are classified as Class II. Medical device recalls have been trending upward over the past decade due to increased device complexity, software integration, and enhanced post-market surveillance capabilities.
+
+Top recalling firms often include large medical device manufacturers such as Medline Industries, Baxter International, Abbott Laboratories, and Medtronic. High recall volumes from a single firm may indicate systemic quality issues or may simply reflect a very large and diverse product portfolio.
+
+Product categories most frequently recalled include cardiovascular devices, in vitro diagnostic products, general hospital supplies, and orthopedic devices. Software-driven recalls have grown substantially as more devices incorporate digital technology.
+
+IMPACT ON PATIENT SAFETY:
+Devices under Class I recall should be removed from use immediately by healthcare facilities. All facilities should have processes to identify and quarantine recalled products. The FDA MAUDE (Manufacturer and User Facility Device Experience) database tracks adverse events associated with medical devices and is often the trigger for recall investigations. Timely response to recall notifications is critical for patient safety.
