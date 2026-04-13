@@ -28,7 +28,7 @@ AI_PROVIDER = "ollama"  # Change to "openai" if using OpenAI
 # Ollama configuration
 PORT = 11434
 OLLAMA_HOST = paste0("http://localhost:", PORT)
-OLLAMA_MODEL = "llama3.2:latest"  # Use a model that supports JSON output
+OLLAMA_MODEL = "gemma3:latest"  # Use a model that supports JSON output
 
 # OpenAI configuration
 if (file.exists(".env")){  readRenviron(".env")  } else {  warning(".env file not found. Make sure it exists in the project root.") }
@@ -45,15 +45,13 @@ reports = reports[reports != ""]  # Remove empty strings
 report = reports[1]
 
 # Load source data (if available) for accuracy checking
-# In this example, we'll use a simple data structure
-source_data = "White County, IL | 2015 | PM10 | Time Driven | hours
-|type        |label_value |label_percent |
-|:-----------|:-----------|:-------------|
-|Light Truck |2.7 M       |51.8%         |
-|Car/ Bike   |1.9 M       |36.1%         |
-|Combo Truck |381.3 k     |7.3%          |
-|Heavy Truck |220.7 k     |4.2%          |
-|Bus         |30.6 k      |0.6%          |"
+# Plain text format works better with smaller models than markdown tables
+source_data = "White County, IL, 2015, PM10 emissions (Time Driven, hours):
+  Light Truck: 2.7 M hours, 51.8%
+  Car/Bike: 1.9 M hours, 36.1%
+  Combo Truck: 381.3 k hours, 7.3%
+  Heavy Truck: 220.7 k hours, 4.2%
+  Bus: 30.6 k hours, 0.6%"
 
 cat("📝 Report for Quality Control:\n")
 cat("---\n")
@@ -78,35 +76,26 @@ create_quality_control_prompt = function(report_text, source_data = NULL) {
   }
   
   # Quality control criteria (from samplevalidation.tex)
+  # MODIFIED: Added specificity and completeness criteria,
+  # strengthened formality (penalize contractions) and faithfulness (penalize hyperbole)
+  # Uses plain text (no markdown bold) for better compatibility with smaller models
   criteria = "
-  
-Quality Control Criteria:
 
-1. **accurate** (boolean): Verify that no part of the paragraph misinterprets the data supplied. Return TRUE if no misinterpretation. FALSE if any problems.
+Evaluate the report on each criterion below. Return ONLY a JSON object.
 
-2. **accuracy** (1-5 Likert scale): Rank the paragraph on a 5-point Likert scale, where 1 = many problems interpreting the Data vs. 5 = no misinterpretation of the Data.
+Criteria:
+- accurate (boolean): true if no data is misinterpreted, false otherwise.
+- accuracy (integer 1-5): 1 = many data misinterpretations, 5 = no misinterpretation.
+- formality (integer 1-5): 1 = casual writing, 5 = government report writing. Penalize contractions (e.g. dont, were, theyre, its) and slang. A 5 means zero contractions and formal tone throughout.
+- faithfulness (integer 1-5): 1 = grandiose unsupported claims, 5 = claims directly from data. Penalize hyperbole (e.g. crucial, critical, absolutely, extremely) and belittling phrases (e.g. obviously, it is clear that).
+- clarity (integer 1-5): 1 = confusing writing, 5 = clear and precise.
+- succinctness (integer 1-5): 1 = unnecessarily wordy, 5 = succinct.
+- relevance (integer 1-5): 1 = irrelevant commentary, 5 = relevant commentary about the data.
+- specificity (integer 1-5): 1 = vague with no numbers or named entities, 5 = cites specific percentages, values, county names, years, and pollutant types from the source data.
+- completeness (integer 1-5): 1 = mentions very few vehicle categories, 5 = mentions all major categories (Light Truck, Car/Bike, Combo Truck, Heavy Truck, Bus).
+- details (string): 0-50 word explanation of your assessment.
 
-3. **formality** (1-5 Likert scale): Rank the paragraph on a 5-point Likert scale, where 1 = casual writing vs. 5 = government report writing.
-
-4. **faithfulness** (1-5 Likert scale): Rank the paragraph on a 5-point Likert scale, where 1 = makes grandiose claims not supported by the data vs. 5 = makes claims directly related to the data.
-
-5. **clarity** (1-5 Likert scale): Rank the paragraph on a 5-point Likert scale, where 1 = confusing writing style vs. 5 = clear and precise.
-
-6. **succinctness** (1-5 Likert scale): Rank the paragraph on a 5-point Likert scale, where 1 = unnecessarily wordy vs. 5 = succinct.
-
-7. **relevance** (1-5 Likert scale): Rank the paragraph on a 5-point Likert scale, where 1 = irrelevant commentary vs. 5 = relevant commentary about the data.
-
-Return your response as valid JSON in this exact format:
-{
-  \"accurate\": true/false,
-  \"accuracy\": 1-5,
-  \"formality\": 1-5,
-  \"faithfulness\": 1-5,
-  \"clarity\": 1-5,
-  \"succinctness\": 1-5,
-  \"relevance\": 1-5,
-  \"details\": \"0-50 word explanation of your assessment\"
-}
+Return ONLY the JSON object, nothing else.
 "
   
   # Combine into full prompt
@@ -124,10 +113,11 @@ Return your response as valid JSON in this exact format:
 ## 1.2 Query AI Function #################################
 
 # Function to query AI and get quality control results
-query_ai_quality_control = function(prompt, provider = AI_PROVIDER) {
+# Retries up to max_retries times if the model returns empty JSON "{}"
+query_ai_quality_control = function(prompt, provider = AI_PROVIDER, max_retries = 3) {
   
   if (provider == "ollama") {
-    # Query Ollama
+    # Query Ollama (with retry for empty responses)
     url = paste0(OLLAMA_HOST, "/api/chat")
     
     body = list(
@@ -142,13 +132,20 @@ query_ai_quality_control = function(prompt, provider = AI_PROVIDER) {
       stream = FALSE
     )
     
-    res = request(url) %>%
-      req_body_json(body) %>%
-      req_method("POST") %>%
-      req_perform()
-    
-    response = resp_body_json(res)
-    output = response$message$content
+    output = "{}"
+    attempt = 0
+    while (output == "{}" && attempt < max_retries) {
+      attempt = attempt + 1
+      if (attempt > 1) { cat("   ⚠️ Empty response, retrying (attempt ", attempt, "/", max_retries, ")...\n") }
+      
+      res = request(url) %>%
+        req_body_json(body) %>%
+        req_method("POST") %>%
+        req_perform()
+      
+      response = resp_body_json(res)
+      output = response$message$content
+    }
     
   } else if (provider == "openai") {
     # Query OpenAI
@@ -207,7 +204,7 @@ parse_quality_control_results = function(json_response) {
   # Parse JSON
   quality_data = fromJSON(json_response)
   
-  # Convert to tibble
+  # Convert to tibble (includes new specificity and completeness criteria)
   results = tibble(
     accurate = quality_data$accurate,
     accuracy = quality_data$accuracy,
@@ -216,6 +213,8 @@ parse_quality_control_results = function(json_response) {
     clarity = quality_data$clarity,
     succinctness = quality_data$succinctness,
     relevance = quality_data$relevance,
+    specificity = quality_data$specificity,
+    completeness = quality_data$completeness,
     details = quality_data$details
   )
   
@@ -249,8 +248,9 @@ cat("\n")
 ## 2.4 Calculate Overall Score #################################
 
 # Calculate average Likert score (excluding boolean accurate)
+# Includes the two new criteria: specificity and completeness
 overall_score = quality_results %>%
-  select(accuracy, formality, faithfulness, clarity, succinctness, relevance) %>%
+  select(accuracy, formality, faithfulness, clarity, succinctness, relevance, specificity, completeness) %>%
   rowMeans()
 
 quality_results = quality_results %>%
@@ -296,14 +296,58 @@ check_multiple_reports = function(reports, source_data = NULL) {
   return(combined_results)
 }
 
-## 3.2 Run Batch Quality Control (Optional) #################################
+## 3.2 Run Batch Quality Control #################################
 
-# Uncomment to check all reports
-# if (length(reports) > 1) {
-#   batch_results = check_multiple_reports(reports, source_data)
-#   cat("\n📊 Batch Quality Control Results:\n")
-#   print(batch_results)
-# }
+# Check all reports so we can compare quality across the full sample
+if (length(reports) > 1) {
+  batch_results = check_multiple_reports(reports, source_data)
+  
+  # Calculate overall score for each report in the batch
+  batch_results = batch_results %>%
+    mutate(
+      overall_score = round(rowMeans(
+        select(., accuracy, formality, faithfulness, clarity, succinctness, relevance, specificity, completeness)
+      ), 2)
+    )
+  
+  cat("\n📊 Batch Quality Control Results:\n")
+  print(batch_results)
+}
+
+# 4. COMPARISON SUMMARY ###################################
+
+## 4.1 Print Side-by-Side Scores #################################
+
+# Show a concise comparison across all reports
+if (exists("batch_results")) {
+  cat("\n")
+  cat("========================================\n")
+  cat("📊 COMPARISON SUMMARY ACROSS ALL REPORTS\n")
+  cat("========================================\n\n")
+  
+  summary_table = batch_results %>%
+    select(report_id, accurate, accuracy, formality, faithfulness, clarity,
+           succinctness, relevance, specificity, completeness, overall_score)
+  
+  print(summary_table)
+  
+  cat("\n📈 Average Scores Across All Reports:\n")
+  avg_scores = batch_results %>%
+    summarise(
+      avg_accuracy = round(mean(accuracy), 2),
+      avg_formality = round(mean(formality), 2),
+      avg_faithfulness = round(mean(faithfulness), 2),
+      avg_clarity = round(mean(clarity), 2),
+      avg_succinctness = round(mean(succinctness), 2),
+      avg_relevance = round(mean(relevance), 2),
+      avg_specificity = round(mean(specificity), 2),
+      avg_completeness = round(mean(completeness), 2),
+      avg_overall = round(mean(overall_score), 2)
+    )
+  print(avg_scores)
+  cat("\n")
+}
 
 cat("✅ AI quality control complete!\n")
 cat("💡 Compare these results with manual quality control (01_manual_quality_control.R) to see how AI performs.\n")
+cat("💡 The added specificity and completeness criteria help bridge the gap between manual pattern-matching QC and AI-driven evaluation.\n")
