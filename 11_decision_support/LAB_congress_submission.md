@@ -1,5 +1,7 @@
 # LAB Submission: AI Architecture for a Congressional Agent
 
+**Anjali Katta**
+
 [11_decision_support/LAB_congress.md](LAB_congress.md)
 
 ---
