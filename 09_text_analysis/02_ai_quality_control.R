@@ -67,8 +67,10 @@ cat("\n---\n\n")
 create_quality_control_prompt = function(report_text, source_data = NULL) {
   
   # Base instructions for quality control
-  instructions = "You are a quality control validator for AI-generated reports. Evaluate the following report text on multiple criteria and return your assessment as valid JSON."
-  
+  instructions = paste0(
+    "You are a quality control validator for AI-generated reports. ",
+    "Evaluate the following report text on multiple criteria and return your assessment as valid JSON."
+  )
   # Add source data if provided for accuracy checking
   data_context = ""
   if (!is.null(source_data)) {
@@ -226,12 +228,12 @@ parse_quality_control_results = function(json_response) {
 ## 2.1 Create Quality Control Prompt #################################
 
 quality_prompt = create_quality_control_prompt(report, source_data)
-
+cat(quality_prompt)
 cat("🤖 Querying AI for quality control...\n\n")
 
 ## 2.2 Query AI #################################
 
-ai_response = query_ai_quality_control(quality_prompt, provider = AI_PROVIDER)
+ai_response = query_ai_quality_control(quality_prompt, provider = "openai")
 
 cat("📥 AI Response (raw):\n")
 cat(ai_response)
@@ -240,7 +242,6 @@ cat("\n\n")
 ## 2.3 Parse and Display Results #################################
 
 quality_results = parse_quality_control_results(ai_response)
-
 cat("✅ Quality Control Results:\n")
 print(quality_results)
 cat("\n")
@@ -264,7 +265,7 @@ cat("📊 Accuracy Check: ", ifelse(quality_results$accurate, "✅ PASS", "❌ F
 ## 3.1 Batch Quality Control Function #################################
 
 # Function to check multiple reports
-check_multiple_reports = function(reports, source_data = NULL) {
+check_multiple_reports = function(reports, source_data = NULL, ai_provider = AI_PROVIDER) {
   
   cat("🔄 Performing quality control on ", length(reports), " reports...\n\n")
   
@@ -278,7 +279,7 @@ check_multiple_reports = function(reports, source_data = NULL) {
     
     # Query AI
     tryCatch({
-      response = query_ai_quality_control(prompt, provider = AI_PROVIDER)
+      response = query_ai_quality_control(prompt, provider = ai_provider)
       results = parse_quality_control_results(response)
       results = results %>% mutate(report_id = i)
       all_results[[i]] = results
@@ -298,55 +299,28 @@ check_multiple_reports = function(reports, source_data = NULL) {
 
 ## 3.2 Run Batch Quality Control #################################
 
-# Check all reports so we can compare quality across the full sample
-if (length(reports) > 1) {
-  batch_results = check_multiple_reports(reports, source_data)
-  
-  # Calculate overall score for each report in the batch
-  batch_results = batch_results %>%
-    mutate(
-      overall_score = round(rowMeans(
-        select(., accuracy, formality, faithfulness, clarity, succinctness, relevance, specificity, completeness)
-      ), 2)
-    )
-  
+reports = read_csv("09_text_analysis/data/prompt_comparison_reports.csv") %>%
+  sample_n(10)
+# Uncomment to check all reports
+if (nrow(reports) > 1) {
+  batch_results = check_multiple_reports(reports$report_text, source_data, ai_provider = "openai")
   cat("\n📊 Batch Quality Control Results:\n")
   print(batch_results)
 }
 
-# 4. COMPARISON SUMMARY ###################################
+# View output
+batch_results %>% glimpse()
 
-## 4.1 Print Side-by-Side Scores #################################
-
-# Show a concise comparison across all reports
-if (exists("batch_results")) {
-  cat("\n")
-  cat("========================================\n")
-  cat("📊 COMPARISON SUMMARY ACROSS ALL REPORTS\n")
-  cat("========================================\n\n")
-  
-  summary_table = batch_results %>%
-    select(report_id, accurate, accuracy, formality, faithfulness, clarity,
-           succinctness, relevance, specificity, completeness, overall_score)
-  
-  print(summary_table)
-  
-  cat("\n📈 Average Scores Across All Reports:\n")
-  avg_scores = batch_results %>%
-    summarise(
-      avg_accuracy = round(mean(accuracy), 2),
-      avg_formality = round(mean(formality), 2),
-      avg_faithfulness = round(mean(faithfulness), 2),
-      avg_clarity = round(mean(clarity), 2),
-      avg_succinctness = round(mean(succinctness), 2),
-      avg_relevance = round(mean(relevance), 2),
-      avg_specificity = round(mean(specificity), 2),
-      avg_completeness = round(mean(completeness), 2),
-      avg_overall = round(mean(overall_score), 2)
-    )
-  print(avg_scores)
-  cat("\n")
-}
+batch_results %>% 
+  summarize(
+    accurate_pc = sum(accurate) / n(),
+    accuracy_mu = mean(accuracy),
+    accuracy_sd = sd(accuracy, na.rm = TRUE),
+    accuracy_se = accuracy_sd / sqrt(n()),
+    accuracy_lower = accuracy_mu - 1.96 * accuracy_se,
+    accuracy_upper = accuracy_mu + 1.96 * accuracy_se
+  ) %>%
+  glimpse()
 
 cat("✅ AI quality control complete!\n")
 cat("💡 Compare these results with manual quality control (01_manual_quality_control.R) to see how AI performs.\n")
