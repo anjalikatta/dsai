@@ -66,10 +66,17 @@ jobs:
             any::dplyr
             any::lubridate
             any::xgboost
+            any::jsonlite
 
       - name: RUN TRAINING SCRIPT
         working-directory: 12_end
         run: Rscript 02_train_model.R
+
+      - name: UPLOAD XGBOOST MODEL ARTIFACT
+        uses: actions/upload-artifact@v4
+        with:
+          name: xgboost-model
+          path: 12_end/data/modelr.json
 
       - name: COMMIT CHANGES
         run: |
