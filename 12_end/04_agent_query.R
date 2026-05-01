@@ -139,54 +139,85 @@ tool_predict_vehicle_count = list(
 
 # 5. RUN OLLAMA TOOL-CALLING LOOP ###################################
 
-messages = list(
+run_brussels_prediction_chat = function(user_text) {
+  messages = list(
+    list(
+      role = "system",
+      content = paste(
+        "You are a Brussels traffic assistant.",
+        "When prediction data is needed, call predict_vehicle_count with day_of_week and hours_of_day vector.",
+        "Map phrases to integers: Monday=1 through Sunday=7; 8 AM=8, noon=12, 6 PM=18, midnight=0.",
+        "Always state units clearly: vehicles observed in one representative minute (1m/t1 interval)",
+        "within the requested hour and day of week."
+      )
+    ),
+    list(role = "user", content = user_text)
+  )
+
+  tools = list(tool_predict_vehicle_count)
+  ollama_result = ollama_chat_once(
+    base_url = OLLAMA_HOST,
+    api_key = OLLAMA_API_KEY,
+    model = OLLAMA_MODEL,
+    messages = messages,
+    tools = tools
+  )
+
+  assistant_msg = ollama_result$message
+  messages[[length(messages) + 1L]] = list(
+    role = "assistant",
+    content = if (is.null(assistant_msg$content)) "" else assistant_msg$content,
+    tool_calls = assistant_msg$tool_calls
+  )
+
+  tool_calls = if (is.null(assistant_msg$tool_calls)) list() else assistant_msg$tool_calls
+  if (length(tool_calls) > 0L) {
+    messages[[length(messages) + 1L]] = build_tool_message(tool_calls[[1]])
+  }
+
+  final_result = ollama_chat_once(
+    base_url = OLLAMA_HOST,
+    api_key = OLLAMA_API_KEY,
+    model = OLLAMA_MODEL,
+    messages = messages,
+    tools = tools
+  )
+
   list(
-    role = "system",
-    content = paste(
-      "You are a Brussels traffic assistant.",
-      "When prediction data is needed, call predict_vehicle_count with day_of_week and hours_of_day vector.",
-      "Always state units clearly: vehicles observed in one representative minute (1m/t1 interval)",
-      "within the requested hour and day of week."
-    )
-  ),
-  list(role = "user", content = "Predict Brussels vehicle count for Monday for every hour (0 through 23).")
-)
-
-tools = list(tool_predict_vehicle_count)
-ollama_result = ollama_chat_once(
-  base_url = OLLAMA_HOST,
-  api_key = OLLAMA_API_KEY,
-  model = OLLAMA_MODEL,
-  messages = messages,
-  tools = tools
-)
-
-assistant_msg = ollama_result$message
-messages[[length(messages) + 1L]] = list(
-  role = "assistant",
-  content = if (is.null(assistant_msg$content)) "" else assistant_msg$content,
-  tool_calls = assistant_msg$tool_calls
-)
-
-tool_calls = if (is.null(assistant_msg$tool_calls)) list() else assistant_msg$tool_calls
-if (length(tool_calls) > 0L) {
-  # Keep this tutorial simple: execute the first requested tool call.
-  messages[[length(messages) + 1L]] = build_tool_message(tool_calls[[1]])
+    agent_text = final_result$content,
+    tool_calls = tool_calls,
+    tool_calls_count = length(tool_calls)
+  )
 }
 
-final_result = ollama_chat_once(
-  base_url = OLLAMA_HOST,
-  api_key = OLLAMA_API_KEY,
-  model = OLLAMA_MODEL,
-  messages = messages,
-  tools = tools
+# 5. RUN OLLAMA TOOL-CALLING (two prompts per activity checklist) #############
+
+out1 = run_brussels_prediction_chat(
+  user_text = paste0(
+    "Predict Brussels vehicle count for Monday at 8 AM. ",
+    "Call the tool once with hours_of_day set to [8] only."
+  )
 )
+cat("Agent result:", out1$agent_text, "\n")
 
-cat("Agent result:", final_result$content, "\n")
+direct1 = predict_vehicle_count(day_of_week = 1L, hours_of_day = 8L)
+cat("Direct API call:\n")
+cat(jsonlite::toJSON(direct1, auto_unbox = TRUE, pretty = TRUE), "\n", sep = "")
+if (length(direct1$predictions) >= 1L) {
+  p1 = direct1$predictions[[1]]$predicted_vehicle_count
+  cat("Match:", grepl(as.character(p1), out1$agent_text, fixed = TRUE), "\n")
+}
 
-# 6. VERIFY ###################################
+out2 = run_brussels_prediction_chat(
+  user_text = paste0(
+    "Predict Brussels vehicle count for Friday at 6 PM. ",
+    "Call the tool once with hours_of_day set to [18] only."
+  )
+)
+cat("Agent result:", out2$agent_text, "\n")
 
-direct = predict_vehicle_count(day_of_week = 1, hours_of_day = 0:23)
-cat("Direct API call predictions returned:", length(direct$predictions), "\n")
-cat("Sample one-minute vehicle count:", direct$predictions[[9]]$predicted_vehicle_count, "(1m/t1 at Monday 08:00)\n")
-cat("Tool calls used:", length(tool_calls), "\n")
+direct2 = predict_vehicle_count(day_of_week = 5L, hours_of_day = 18L)
+cat("Direct API call:\n")
+cat(jsonlite::toJSON(direct2, auto_unbox = TRUE, pretty = TRUE), "\n", sep = "")
+
+cat("Tool calls used (prompt 2):", out2$tool_calls_count, "\n")

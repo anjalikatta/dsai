@@ -13,12 +13,14 @@ sys.path.append(str(ROOT_DIR / "08_function_calling"))
 from dotenv import load_dotenv
 from functions import agent
 
+import json
 import requests
 
 # 1. CONFIG ###################################
 
 load_dotenv(ROOT_DIR / "12_end" / ".env")
 
+# Paste your live URL in 12_end/.env as API_PUBLIC_URL=... or override here.
 ENDPOINT_URL = os.getenv("API_PUBLIC_URL", "http://localhost:8000").rstrip("/")
 MODEL = os.getenv("OLLAMA_MODEL", "smollm2:1.7b")
 
@@ -82,36 +84,48 @@ tool_predict_vehicle_count = {
 
 # 4. RUN AGENT ###################################
 
-messages = [
-    {
-        "role": "system",
-        "content": (
-            "You are a Brussels traffic assistant. "
-            "Always report units clearly as vehicles observed in one representative minute "
-            "(1m/t1 interval) within the requested hour and day of week. "
-            "Call predict_vehicle_count using day_of_week and hours_of_day vector."
-        ),
-    },
-    {
-        "role": "user",
-        "content": "Predict Brussels vehicle count for Monday for every hour (0 through 23).",
-    }
-]
 tools = [tool_predict_vehicle_count]
-
-result = agent(
-    messages=messages,
-    model=MODEL,
-    output="text",
-    tools=tools
+system_prompt = (
+    "You are a Brussels traffic assistant. "
+    "Always report units clearly as vehicles observed in one representative minute "
+    "(1m/t1 interval) within the requested hour and day of week. "
+    "Map phrases to integers: Monday=1, Tuesday=2, ..., Sunday=7; "
+    "8 AM→8, noon→12, 6 PM→18, midnight→0. "
+    "Call predict_vehicle_count with day_of_week and hours_of_day (hours as a list)."
 )
 
-print("Agent result:", result)
 
-# 5. VERIFY ###################################
+def run_turn(user_text: str):
+    return agent(
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_text},
+        ],
+        model=MODEL,
+        output="text",
+        tools=tools,
+    )
 
-direct = predict_vehicle_count(day_of_week=1, hours_of_day=list(range(24)))
-print("Direct API call predictions returned:", len(direct["predictions"]))
-print(f"Sample one-minute vehicle count: {direct['predictions'][8]['predicted_vehicle_count']} (1m/t1 at Monday 08:00)")
+
+# Stage 2: Natural-language ask + explicit clock hint so small local models hit the right tool args
+result1 = run_turn(
+    "Predict Brussels vehicle count for Monday at 8 AM. "
+    "Call the tool once with hours_of_day set to [8] only."
+)
+print("Agent result:", result1)
+direct1 = predict_vehicle_count(day_of_week=1, hours_of_day=[8])
+print("Direct API call:", json.dumps(direct1, indent=2))
 print("Unit:", UNIT_NOTE)
-print("Match:", str(direct["predictions"][8]["predicted_vehicle_count"]) in str(result))
+p1 = direct1["predictions"][0]["predicted_vehicle_count"]
+print("Match:", str(p1) in str(result1))
+
+# Second prompt: different day/hour mapping
+result2 = run_turn(
+    "Predict Brussels vehicle count for Friday at 6 PM. "
+    "Call the tool once with hours_of_day set to [18] only."
+)
+print("Agent result:", result2)
+direct2 = predict_vehicle_count(day_of_week=5, hours_of_day=[18])
+print("Direct API call:", json.dumps(direct2, indent=2))
+p2 = direct2["predictions"][0]["predicted_vehicle_count"]
+print("Match:", str(p2) in str(result2))
