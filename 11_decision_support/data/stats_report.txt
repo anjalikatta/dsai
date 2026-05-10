@@ -1,0 +1,65 @@
+📈 Descriptive stats — overall_score by prompt_id
+           mean    std  count
+prompt_id                    
+A          4.60  0.234     20
+B          4.35  0.619     20
+C          2.84  0.287     20
+
+🔍 Bartlett's test for equal variances: stat=20.4653, p=0.0000
+   ❌ Unequal variances — using Welch ANOVA
+
+📊 Welch's ANOVA (unequal variance): F(2.00, 35.00)=226.2720, p=9.565e-21
+   ✅ At least one prompt differs significantly.
+
+📋 Tukey HSD post-hoc:
+Multiple Comparison of Means - Tukey HSD, FWER=0.05 
+====================================================
+group1 group2 meandiff p-adj   lower   upper  reject
+----------------------------------------------------
+     A      B    -0.25 0.1482 -0.5668  0.0668  False
+     A      C    -1.76    0.0 -2.0768 -1.4432   True
+     B      C    -1.51    0.0 -1.8268 -1.1932   True
+----------------------------------------------------
+
+📊 Per-dimension Welch ANOVAs:
+     regulatory_grounding: F=19.163, p=3.189e-06, means={'A': 4.6, 'B': 4.5, 'C': 2.4} [Welch ANOVA]
+         data_specificity: F=8.068, p=0.0008213, means={'A': 4.4, 'B': 5.0, 'C': 4.9} [Standard ANOVA]
+   patient_safety_framing: F=17.637, p=6.871e-06, means={'A': 4.95, 'B': 3.8, 'C': 4.8} [Welch ANOVA]
+            actionability: F=1028.099, p=2.219e-33, means={'A': 4.05, 'B': 4.95, 'C': 1.1} [Welch ANOVA]
+      structural_fidelity: F=150.161, p=1.906e-23, means={'A': 5.0, 'B': 3.5, 'C': 1.0} [Standard ANOVA]
+
+📐 OLS regression: overall_score ~ C(prompt_id)
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:          overall_score   R-squared:                       0.786
+Model:                            OLS   Adj. R-squared:                  0.778
+Method:                 Least Squares   F-statistic:                     104.6
+Date:                Sat, 09 May 2026   Prob (F-statistic):           8.32e-20
+Time:                        21:37:40   Log-Likelihood:                -31.015
+No. Observations:                  60   AIC:                             68.03
+Df Residuals:                      57   BIC:                             74.31
+Df Model:                           2                                         
+Covariance Type:            nonrobust                                         
+=====================================================================================
+                        coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------
+Intercept             4.6000      0.093     49.417      0.000       4.414       4.786
+C(prompt_id)[T.B]    -0.2500      0.132     -1.899      0.063      -0.514       0.014
+C(prompt_id)[T.C]    -1.7600      0.132    -13.370      0.000      -2.024      -1.496
+==============================================================================
+Omnibus:                       37.696   Durbin-Watson:                   2.417
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              111.608
+Skew:                          -1.836   Prob(JB):                     5.82e-25
+Kurtosis:                       8.582   Cond. No.                         3.73
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+✅ Pass-rate (overall >= 4.0 AND hallucination_free):
+prompt_id
+A    0.95
+B    0.85
+C    0.00
+Name: passed, dtype: float64
+

@@ -23,6 +23,10 @@ node_modules/
 z/
 12_end/.venv/
 12_end/03_fastapi/.venv/
+.venv-hw3/
+.venv/
+# Microsoft Word lock files (created when a .docx is open)
+~$*
 10_data_management/agentpy/rsconnect-python/
 10_data_management/agentr/rsconnect/
 10_data_management/agentpy/rsconnect-python/agentpy.json

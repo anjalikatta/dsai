@@ -1,0 +1,15 @@
+FDA Device Recalls — Year 2024 — sample of 12 records
+Source: openFDA Device Recall API
+
+- recall_number= | date=2024-07-31 | firm=Medtronic MiniMed, Inc. | product_code=OZO | status=Open, Classified | root_cause=Device Design
+- recall_number= | date=2024-07-31 | firm=Medtronic MiniMed, Inc. | product_code=OYC | status=Open, Classified | root_cause=Device Design
+- recall_number= | date=2024-07-31 | firm=Medtronic MiniMed, Inc. | product_code=OZP | status=Open, Classified | root_cause=Device Design
+- recall_number= | date=2024-08-30 | firm=Mercury Enterprises, Inc. dba Mercury Medical | product_code=BTL | status=Open, Classified | root_cause=Process control
+- recall_number= | date=2024-09-13 | firm=Zyno Medical LLC | product_code=FRN | status=Open, Classified | root_cause=Process change control
+- recall_number= | date=2024-08-20 | firm=Ossur H F Grjothals 5 Reykjavik Iceland | product_code=IQK | status=Open, Classified | root_cause=Nonconforming Material/Component
+- recall_number= | date=2024-08-23 | firm=Young Dental Manufacturing I, LLC | product_code=FLG | status=Open, Classified | root_cause=Material/Component Contamination
+- recall_number= | date=2024-08-12 | firm=Becton, Dickinson and Company, BD Bio Sciences | product_code=PER | status=Open, Classified | root_cause=Software change control
+- recall_number= | date=2024-06-26 | firm=Smiths Medical ASD Inc. | product_code=FPA | status=Open, Classified | root_cause=Process control
+- recall_number= | date=2024-06-26 | firm=Smiths Medical ASD Inc. | product_code=FPA | status=Open, Classified | root_cause=Process control
+- recall_number= | date=2024-06-26 | firm=Smiths Medical ASD Inc. | product_code=FPA | status=Open, Classified | root_cause=Process control
+- recall_number= | date=2024-06-26 | firm=Smiths Medical ASD Inc. | product_code=FPA | status=Open, Classified | root_cause=Process control

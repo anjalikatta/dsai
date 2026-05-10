@@ -1,0 +1,135 @@
+{
+  "overall": {
+    "descriptive_stats": [
+      {
+        "prompt_id": "A",
+        "mean": 4.6,
+        "std": 0.234,
+        "count": 20
+      },
+      {
+        "prompt_id": "B",
+        "mean": 4.35,
+        "std": 0.619,
+        "count": 20
+      },
+      {
+        "prompt_id": "C",
+        "mean": 2.84,
+        "std": 0.287,
+        "count": 20
+      }
+    ],
+    "bartlett": {
+      "statistic": 20.465272652625305,
+      "p_value": 3.5976798035074386e-05,
+      "equal_variance": false
+    },
+    "anova": {
+      "kind": "Welch's ANOVA (unequal variance)",
+      "F": 226.27197238427524,
+      "df1": 2.0,
+      "df2": 35.00074780178187,
+      "p_value": 9.564733192873729e-21
+    },
+    "tukey": [
+      {
+        "group1": "A",
+        "group2": "B",
+        "meandiff": -0.25,
+        "p_adj": 0.1482,
+        "lower": -0.5668,
+        "upper": 0.0668,
+        "reject": false
+      },
+      {
+        "group1": "A",
+        "group2": "C",
+        "meandiff": -1.76,
+        "p_adj": 0.0,
+        "lower": -2.0768,
+        "upper": -1.4432,
+        "reject": true
+      },
+      {
+        "group1": "B",
+        "group2": "C",
+        "meandiff": -1.51,
+        "p_adj": 0.0,
+        "lower": -1.8268,
+        "upper": -1.1932,
+        "reject": true
+      }
+    ]
+  },
+  "per_dimension": {
+    "regulatory_grounding": {
+      "F": 19.162865757255265,
+      "p_value": 3.189052141144801e-06,
+      "kind": "Welch",
+      "means": {
+        "A": 4.6,
+        "B": 4.5,
+        "C": 2.4
+      }
+    },
+    "data_specificity": {
+      "F": 8.06849315068493,
+      "p_value": 0.0008213479086283858,
+      "kind": "Standard",
+      "means": {
+        "A": 4.4,
+        "B": 5.0,
+        "C": 4.9
+      }
+    },
+    "patient_safety_framing": {
+      "F": 17.636851963075443,
+      "p_value": 6.871140606150065e-06,
+      "kind": "Welch",
+      "means": {
+        "A": 4.95,
+        "B": 3.8,
+        "C": 4.8
+      }
+    },
+    "actionability": {
+      "F": 1028.0989899935998,
+      "p_value": 2.219066355050785e-33,
+      "kind": "Welch",
+      "means": {
+        "A": 4.05,
+        "B": 4.95,
+        "C": 1.1
+      }
+    },
+    "structural_fidelity": {
+      "F": 150.1612903225806,
+      "p_value": 1.9063832922681295e-23,
+      "kind": "Standard",
+      "means": {
+        "A": 5.0,
+        "B": 3.5,
+        "C": 1.0
+      }
+    }
+  },
+  "regression": {
+    "params": {
+      "Intercept": 4.6000000000000005,
+      "C(prompt_id)[T.B]": -0.2500000000000013,
+      "C(prompt_id)[T.C]": -1.7600000000000013
+    },
+    "pvalues": {
+      "Intercept": 1.709500151965813e-48,
+      "C(prompt_id)[T.B]": 0.06261927074996779,
+      "C(prompt_id)[T.C]": 3.2193368252564402e-19
+    },
+    "rsquared": 0.785940276513674,
+    "pass_rate": {
+      "A": 0.95,
+      "B": 0.85,
+      "C": 0.0
+    }
+  }
+}
